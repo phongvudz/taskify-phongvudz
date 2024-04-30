@@ -13,12 +13,14 @@ interface UseActionOptions<TInput, TOutput> {
 
 export const useAction = <TInput, TOutput>(
   action: Action<TInput, TOutput>,
-  options: UseActionOptions<TInput, TOutput>
+  options?: UseActionOptions<TInput, TOutput>
 ) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | undefined>(undefined);
   const [data, setData] = useState<TOutput | undefined>(undefined);
-  const [fieldErrors, setFieldErrors] = useState<FieldErrors<TInput>>({});
+  const [fieldErrors, setFieldErrors] = useState<
+    FieldErrors<TInput | undefined>
+  >({});
 
   const execute = useCallback(
     async (input: TInput) => {
@@ -29,21 +31,20 @@ export const useAction = <TInput, TOutput>(
 
         if (!result) return;
 
+        setFieldErrors(result.fieldErrors);
+
         if (result.data) {
           setData(result.data);
-          options.onSuccess?.(result.data);
+          options?.onSuccess?.(result.data);
         }
 
         if (result.error) {
           setError(result.error);
-          options.onError?.(result.error);
-        }
-        if (result.fieldErrors) {
-          setFieldErrors(result.fieldErrors);
+          options?.onError?.(result.error);
         }
       } finally {
         setIsLoading(false);
-        options.onCompleted?.();
+        options?.onCompleted?.();
       }
     },
     [action, options]
