@@ -105,7 +105,7 @@ const ImageUnsplash = z.object({
 
 export type ImageUnsplash = z.infer<typeof ImageUnsplash>;
 
-export const listImageUnsplash: ImageUnsplash[] = [
+export const listImageUnsplash: any[] = [
   {
     id: "vSa9jLXYo40",
     slug: "snow-cape-mountain-vSa9jLXYo40",
