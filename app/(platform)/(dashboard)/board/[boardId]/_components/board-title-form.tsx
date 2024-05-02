@@ -38,17 +38,22 @@ export const BoardTitleForm = ({ board }: BoardTitleFormProps) => {
     });
   }, []);
 
-  const disableEditing = useCallback(() => {}, []);
+  const disableEditing = useCallback(() => {
+    setIsEditing(false);
+  }, []);
 
   const onSubmit = useCallback(
     async (formData: FormData) => {
       const reqTitle = formData.get("title") as string;
 
-      if (reqTitle === title) return;
+      if (reqTitle === title) {
+        disableEditing();
+        return;
+      }
 
       execute({ title: reqTitle, id: board.id });
     },
-    [board.id, execute, title]
+    [board.id, disableEditing, execute, title]
   );
 
   const onBlur = useCallback(() => {
