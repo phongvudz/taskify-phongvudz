@@ -7,6 +7,10 @@ import { auth } from "@clerk/nextjs/server";
 import { InputType, OutputType } from "./type";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { createAuditLog } from "@/lib/create-audit-log";
+import {
+  hasAvailiableCount,
+  increasementAvailiableCount,
+} from "@/lib/org-limit";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();
@@ -14,6 +18,14 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
   if (!userId || !orgId) {
     return {
       error: "Unauthorized",
+    };
+  }
+
+  const canCreate = await hasAvailiableCount();
+
+  if (!canCreate) {
+    return {
+      error: "You have reached the maximum number of boards",
     };
   }
 
@@ -48,6 +60,8 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
         orgId,
       },
     });
+
+    await increasementAvailiableCount();
 
     await createAuditLog({
       entityType: "BOARD",

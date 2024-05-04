@@ -9,6 +9,7 @@ import { createSafeAction } from "@/lib/create-safe-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/create-audit-log";
+import { decreasementAvailiableCount } from "@/lib/org-limit";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();
@@ -31,6 +32,8 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
         orgId,
       },
     });
+
+    await decreasementAvailiableCount();
 
     await createAuditLog({
       entityType: "BOARD",
