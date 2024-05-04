@@ -7,8 +7,8 @@ import { useQueryClient } from "react-query";
 
 import { CardWithList } from "@/types";
 
-import { FormInput } from "../form/form-input";
-import { Skeleton } from "../ui/skeleton";
+import { FormInput } from "../../form/form-input";
+import { Skeleton } from "../../ui/skeleton";
 import { useAction } from "@/hooks/use-action";
 import { updateCard } from "@/actions/update-card";
 import { toast } from "sonner";

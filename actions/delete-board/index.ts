@@ -10,6 +10,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createAuditLog } from "@/lib/create-audit-log";
 import { decreasementAvailiableCount } from "@/lib/org-limit";
+import { checkSubscription } from "@/lib/subscription";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();
@@ -19,6 +20,8 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
       error: "Unauthorized",
     };
   }
+
+  const isPro = await checkSubscription();
 
   // Delete a board
   const { id } = validatedData;
@@ -33,7 +36,9 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
       },
     });
 
-    await decreasementAvailiableCount();
+    if (!isPro) {
+      await decreasementAvailiableCount();
+    }
 
     await createAuditLog({
       entityType: "BOARD",
