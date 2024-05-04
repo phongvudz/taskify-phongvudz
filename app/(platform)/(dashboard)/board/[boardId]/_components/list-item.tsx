@@ -12,7 +12,7 @@ type Props = {
   index: number;
 };
 
-const ListItem = ({ data, index }: Props) => {
+export const ListItem = ({ data, index }: Props) => {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [isEditing, setIsEditing] = useState(false);
@@ -28,11 +28,6 @@ const ListItem = ({ data, index }: Props) => {
     });
   }, []);
 
-  {
-    /* 
-    TODO: Add a feature to add a new card to the list
-     */
-  }
   return (
     <Draggable draggableId={data.id} index={index}>
       {(provided) => (
@@ -77,5 +72,3 @@ const ListItem = ({ data, index }: Props) => {
     </Draggable>
   );
 };
-
-export default ListItem;
