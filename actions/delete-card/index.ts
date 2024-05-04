@@ -1,7 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { DeleteList } from "./schema";
+import { DeleteCard } from "./schema";
 import { InputType, OutputType } from "./type";
 
 import { auth } from "@clerk/nextjs/server";
@@ -21,47 +21,35 @@ export const handler = async (
   }
   const { id, boardId } = validatedData;
 
-  let list;
+  let card;
 
   try {
-    const board = await db.board.findUnique({
-      where: {
-        id: boardId,
-        orgId,
-      },
-    });
-
-    if (!board) {
-      return {
-        error: "Board not found",
-      };
-    }
-
-    list = await db.list.delete({
+    card = await db.card.delete({
       where: {
         id,
-        boardId,
-        board: {
-          orgId,
+        lists: {
+          board: {
+            orgId,
+          },
         },
       },
     });
 
     await createAuditLog({
-      entityType: "LIST",
-      entityId: list.id,
-      entityTitle: list.title,
+      entityType: "CARD",
+      entityId: card.id,
+      entityTitle: card.title,
       action: "DELETE",
     });
   } catch (error) {
     return {
-      error: "Failed to updated list",
+      error: "Failed to deleted card",
     };
   }
 
   revalidatePath(`/board/${boardId}`);
 
-  return { data: list };
+  return { data: card };
 };
 
-export const deleteList = createSafeAction(DeleteList, handler);
+export const deleteCard = createSafeAction(DeleteCard, handler);

@@ -1,11 +1,12 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { UpdateBoard } from "./schema";
+import { UpdateCard } from "./schema";
 
 import { auth } from "@clerk/nextjs/server";
 import { InputType, OutputType } from "./type";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { revalidatePath } from "next/cache";
 import { createAuditLog } from "@/lib/create-audit-log";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
@@ -17,26 +18,28 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
     };
   }
 
-  // Create a board
-  const { title, id } = validatedData;
+  // Update a card
+  const { id, boardId, ...values } = validatedData;
 
-  let board;
+  let card;
 
   try {
-    board = await db.board.update({
+    card = await db.card.update({
       where: {
         id,
-        orgId,
+        lists: {
+          board: { orgId },
+        },
       },
       data: {
-        title,
+        ...values,
       },
     });
 
     await createAuditLog({
-      entityType: "BOARD",
-      entityId: board.id,
-      entityTitle: board.title,
+      entityType: "CARD",
+      entityId: card.id,
+      entityTitle: card.title,
       action: "UPDATE",
     });
   } catch (error) {
@@ -45,7 +48,9 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
     };
   }
 
-  return { data: board };
+  revalidatePath(`/board/${boardId}`);
+
+  return { data: card };
 };
 
-export const updateBoard = createSafeAction(UpdateBoard, handler);
+export const updateCard = createSafeAction(UpdateCard, handler);

@@ -6,6 +6,7 @@ import { CreateBoard } from "./schema";
 import { auth } from "@clerk/nextjs/server";
 import { InputType, OutputType } from "./type";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { createAuditLog } from "@/lib/create-audit-log";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();
@@ -46,6 +47,13 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
         imageUserName,
         orgId,
       },
+    });
+
+    await createAuditLog({
+      entityType: "BOARD",
+      entityId: board.id,
+      entityTitle: board.title,
+      action: "CREATE",
     });
   } catch (error) {
     return {

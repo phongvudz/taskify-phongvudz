@@ -7,6 +7,7 @@ import { InputType, OutputType } from "./type";
 import { auth } from "@clerk/nextjs/server";
 import { revalidatePath } from "next/cache";
 import { createSafeAction } from "@/lib/create-safe-action";
+import { createAuditLog } from "@/lib/create-audit-log";
 
 export const handler = async (
   validatedData: InputType
@@ -47,6 +48,13 @@ export const handler = async (
       data: {
         title,
       },
+    });
+
+    await createAuditLog({
+      entityType: "LIST",
+      entityId: list.id,
+      entityTitle: list.title,
+      action: "UPDATE",
     });
   } catch (error) {
     return {

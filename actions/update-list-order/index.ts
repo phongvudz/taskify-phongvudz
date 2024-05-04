@@ -7,6 +7,7 @@ import { auth } from "@clerk/nextjs/server";
 import { InputType, OutputType } from "./type";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { revalidatePath } from "next/cache";
+import { createAuditLog } from "@/lib/create-audit-log";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();

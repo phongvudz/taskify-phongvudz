@@ -2,12 +2,13 @@
 
 import { db } from "@/lib/db";
 import { DeleteBoard } from "./schema";
-
 import { auth } from "@clerk/nextjs/server";
+
 import { InputType, OutputType } from "./type";
 import { createSafeAction } from "@/lib/create-safe-action";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { createAuditLog } from "@/lib/create-audit-log";
 
 const handler = async (validatedData: InputType): Promise<OutputType> => {
   const { userId, orgId } = auth();
@@ -18,7 +19,7 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
     };
   }
 
-  // Create a board
+  // Delete a board
   const { id } = validatedData;
 
   let board;
@@ -30,6 +31,13 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
         orgId,
       },
     });
+
+    await createAuditLog({
+      entityType: "BOARD",
+      entityId: board.id,
+      entityTitle: board.title,
+      action: "DELETE",
+    });
   } catch (error) {
     return {
       error: "Failed to delete board",
@@ -38,7 +46,6 @@ const handler = async (validatedData: InputType): Promise<OutputType> => {
 
   revalidatePath(`/organization/${orgId}`);
   redirect(`/organization/${orgId}`);
-  return { data: true };
 };
 
 export const deleteBoard = createSafeAction(DeleteBoard, handler);
